@@ -33,7 +33,7 @@ def convert_f_to_c(temp_in_fahrenheit):
     Returns:
         A float representing a temperature in degrees Celcius, rounded to 1 decimal place.
     """
-    temp_in_celsius = (temp_in_fahrenheit - 32) * 5/9
+    temp_in_celsius = (float(temp_in_fahrenheit) -32) * 5/9
     return round(temp_in_celsius,1)
 
 def calculate_mean(weather_data):
@@ -45,8 +45,12 @@ def calculate_mean(weather_data):
         A float representing the mean value.
     """
 
-    mean = sum (weather_data) / len (weather_data)
-    return mean
+    if not weather_data:
+        return "No daily weather data available."
+
+    numeric_data = [float(x) for x in weather_data]
+    return sum(numeric_data) / len(numeric_data)
+
 
 def load_data_from_csv(csv_file):
     """Reads a csv file and stores the data in a list.
@@ -56,8 +60,6 @@ def load_data_from_csv(csv_file):
     Returns:
         A list of lists, where each sublist is a (non-empty) line in the csv file.
     """
-
-    import csv
     data = []
     with open(csv_file, newline='', encoding='utf-8') as file:
         reader = csv.reader(file)
@@ -78,12 +80,16 @@ def find_min(weather_data):
     Returns:
         The minimum value and it's position in the list. (In case of multiple matches, return the index of the *last* example in the list.)
     """
-    if not weather_data:
-        return None, None 
 
-    min_value = min(weather_data)
-    last_index = len(weather_data) - 1 - weather_data[::-1].index(min_value)
+    numeric_data = [float(x) for x in weather_data]
+
+    if not numeric_data:
+        return ()
+
+    min_value = min(numeric_data)
+    last_index = len(numeric_data) - 1 - numeric_data[::-1].index(min_value)
     return min_value, last_index
+
 
 def find_max(weather_data):
     """Calculates the maximum value in a list of numbers.
@@ -93,11 +99,13 @@ def find_max(weather_data):
     Returns:
         The maximum value and it's position in the list. (In case of multiple matches, return the index of the *last* example in the list.)
     """
-    if not weather_data:
-        return "No daily weather data available."
-    
-    max_value = max(weather_data)
-    last_index = len(weather_data) - 1 - weather_data[::-1].index(max_value)
+    numeric_data = [float(x) for x in weather_data]
+
+    if not numeric_data:
+        return ()
+
+    max_value = max(numeric_data)
+    last_index = len(numeric_data) - 1 - numeric_data[::-1].index(max_value)
     return max_value, last_index
 
 def generate_summary(weather_data):
@@ -107,6 +115,8 @@ def generate_summary(weather_data):
         weather_data: A list of lists, where each sublist represents a day of weather data.
     Returns:
         A string containing the summary information."""
+    
+
     if not weather_data:
         return "No daily weather data available."
 
@@ -116,6 +126,7 @@ def generate_summary(weather_data):
     max_day = ""
     total_min = 0
     total_max = 0
+
     for day in weather_data:
         date_str, min_f, max_f = day
         min_c = convert_f_to_c(min_f)
@@ -147,6 +158,7 @@ def generate_summary(weather_data):
 
     return summary
 
+
 def generate_daily_summary(weather_data):
     """Outputs a daily summary for the given weather data.
 
@@ -155,28 +167,32 @@ def generate_daily_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
-
-    from datetime import datetime
-    from weather import convert_f_to_c, format_temperature
-    
     if not weather_data:
         return "No daily weather data available."
 
     daily_summaries = []
-    header = "5 Day Overview\n\n"
-
-    for day in weather_data:
+    for i, day in enumerate(weather_data):
         date_str, min_f, max_f = day
         date = datetime.fromisoformat(date_str).strftime("%A %d %B %Y")
         min_c = round(convert_f_to_c(min_f), 1)
         max_c = round(convert_f_to_c(max_f), 1)
 
-        summary = (
-            f"---- {date} ----\n"
-            f"  Minimum Temperature: {format_temperature(min_c)}\n"
+        summary_lines = [
+            f"---- {date} ----",
+            f"  Minimum Temperature: {format_temperature(min_c)}",
             f"  Maximum Temperature: {format_temperature(max_c)}"
-        )
-        daily_summaries.append(summary)
+        ]
 
-    full_summary = header + "\n\n".join(daily_summaries)
-    return full_summary
+        # ✅ Add hyphen to the end of the last line of the last summary
+        if i == len(weather_data) - 1:
+            summary_lines[-1] += "-"
+
+        daily_summaries.append("\n".join(summary_lines))
+
+    # ✅ Include the header and join all summaries
+    return f"{len(weather_data)} Day Overview\n\n" + "\n\n".join(daily_summaries)
+
+
+
+
+
