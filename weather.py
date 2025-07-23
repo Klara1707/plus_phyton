@@ -23,7 +23,7 @@ def convert_date(iso_string):
         A date formatted like: Weekday Date Month Year e.g. Tuesday 06 July 2021
     """
     dt = datetime.fromisoformat (iso_string)
-    return dt.strftime("%A %d %B %Y");          
+    return dt.strftime("%A %d %B %Y")          
   
 def convert_f_to_c(temp_in_fahrenheit):
     """Converts a temperature from Fahrenheit to Celcius.
@@ -171,28 +171,20 @@ def generate_daily_summary(weather_data):
         return "No daily weather data available."
 
     daily_summaries = []
-    for i, day in enumerate(weather_data):
+ 
+    for day in weather_data:
         date_str, min_f, max_f = day
         date = datetime.fromisoformat(date_str).strftime("%A %d %B %Y")
         min_c = round(convert_f_to_c(min_f), 1)
         max_c = round(convert_f_to_c(max_f), 1)
 
-        summary_lines = [
-            f"---- {date} ----",
-            f"  Minimum Temperature: {format_temperature(min_c)}",
+        summary = (
+            f"---- {date} ----\n"
+            f"  Minimum Temperature: {format_temperature(min_c)}\n"
             f"  Maximum Temperature: {format_temperature(max_c)}"
-        ]
+        )
+        daily_summaries.append(summary)
 
-        # ✅ Add hyphen to the end of the last line of the last summary
-        if i == len(weather_data) - 1:
-            summary_lines[-1] += "-"
-
-        daily_summaries.append("\n".join(summary_lines))
-
-    # ✅ Include the header and join all summaries
-    return f"{len(weather_data)} Day Overview\n\n" + "\n\n".join(daily_summaries)
-
-
-
-
-
+    full_summary = "\n\n".join(daily_summaries) + "\n\n"
+    print(full_summary)
+    return full_summary
